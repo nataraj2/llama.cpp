@@ -110,32 +110,11 @@ if (CUDAToolkit_FOUND)
         endif()
     else()
 
-        # Shared libraries, portable handling
-
-        # 1. Try HPC SDK environment (Perlmutter)
-        if(DEFINED ENV{CUDA_HOME})
-            set(CUDA_LIB_DIR "$ENV{CUDA_HOME}/lib64")
-            set(MATH_LIB_DIR "$ENV{CUDA_HOME}/math_libs/12.4/lib64")
-        elseif(DEFINED ENV{CUDATOOLKIT_HOME})
-            set(CUDA_LIB_DIR "$ENV{CUDATOOLKIT_HOME}/lib64")
-            set(MATH_LIB_DIR "$ENV{CUDATOOLKIT_HOME}/math_libs/12.4/lib64")
-        else()
-            # 2. Fall back to CMake CUDA targets if available
-            find_package(CUDAToolkit REQUIRED)
-            set(CUDA_LIB_DIR "${CUDAToolkit_LIBRARY_DIR}")
-            set(MATH_LIB_DIR "${CUDAToolkit_LIBRARY_DIR}")
-        endif()
-
-        # 3. Find each library explicitly (portable)
-        find_library(CUBLAS_LIBRARY cublas HINTS ${MATH_LIB_DIR} PATH_SUFFIXES lib64 lib)
-        find_library(CUBLASLT_LIBRARY cublasLt HINTS ${MATH_LIB_DIR} PATH_SUFFIXES lib64 lib)
-        find_library(CUDART_LIBRARY cudart HINTS ${CUDA_LIB_DIR} PATH_SUFFIXES lib64 lib)
-
-        if(NOT CUBLAS_LIBRARY OR NOT CUBLASLT_LIBRARY OR NOT CUDART_LIBRARY)
-            message(FATAL_ERROR "Failed to locate CUDA libraries. Make sure CUDA_HOME or CUDATOOLKIT_HOME is set, or CUDAToolkit is installed.")
-        endif()
-
-        target_link_libraries(ggml-cuda PRIVATE ${CUBLAS_LIBRARY} ${CUBLASLT_LIBRARY} ${CUDART_LIBRARY})
+        target_link_libraries(ggml-cuda PRIVATE 
+        /opt/nvidia/hpc_sdk/Linux_x86_64/24.5/math_libs/12.4/targets/x86_64-linux/lib/libcublas.so
+        /opt/nvidia/hpc_sdk/Linux_x86_64/24.5/math_libs/12.4/targets/x86_64-linux/lib/libcublasLt.so
+        /opt/nvidia/hpc_sdk/Linux_x86_64/24.5/cuda/12.4/lib64/libcudart.so
+        )
     endif()
 
     if (GGML_CUDA_NO_VMM)
